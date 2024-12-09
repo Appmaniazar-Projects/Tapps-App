@@ -45,7 +45,37 @@ class ProvinceDamsScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              data: (dams) => ListView.separated(
+              data: (dams) => dams.isEmpty 
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.water_drop_outlined, 
+                          color: Colors.white.withOpacity(0.6), 
+                          size: 100
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'No dam data available',
+                          style: TextStyles.subtitleText.copyWith(
+                            color: Colors.white.withOpacity(0.6),
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Please check your permissions or network connection',
+                          style: TextStyles.subtitleText.copyWith(
+                            color: Colors.white.withOpacity(0.4),
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: dams.length,
                 separatorBuilder: (context, index) => const Divider(
@@ -54,24 +84,31 @@ class ProvinceDamsScreen extends ConsumerWidget {
                 ),
                 itemBuilder: (context, index) {
                   final dam = dams[index];
+                  final level = (dam['this_week_level'] ?? 0.0).toDouble();
                   return ListTile(
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
                     title: Text(
-                      dam['name'] ?? '',
+                      dam['name'] ?? 'Unknown Dam',
                       style: TextStyles.subtitleText.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    trailing: Text(
-                      '${(dam['this_week_level'] ?? 0.0).toStringAsFixed(1)}%',
-                      style: TextStyles.subtitleText.copyWith(
-                        color: _getLevelColor(dam['this_week_level'] ?? 0.0),
-                        fontWeight: FontWeight.bold,
-                      ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '${level.toStringAsFixed(1)}%',
+                          style: TextStyles.subtitleText.copyWith(
+                            color: _getLevelColor(level),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

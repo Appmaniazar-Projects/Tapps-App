@@ -3,7 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:tapps/constants/app_colors.dart';
+import 'package:tapps/screens/ec_dams_screen.dart';
+import 'package:tapps/screens/fs_dams_screen.dart';
+import 'package:tapps/screens/gp_dams_screen.dart';
+import 'package:tapps/screens/kzn_dams_screen.dart';
+import 'package:tapps/screens/lp_dams_screen.dart';
+import 'package:tapps/screens/mp_dams_screen.dart';
+import 'package:tapps/screens/nc_dams_screen.dart';
+import 'package:tapps/screens/nw_dams_screen.dart';
 import 'package:tapps/screens/province_dams_screen.dart';
+import 'package:tapps/screens/wc_dams_screen.dart';
 import 'package:tapps/services/firebase_service.dart';
 import 'package:tapps/views/gradient_container.dart';
 
@@ -114,15 +123,80 @@ class ProvinceDetailsScreen extends ConsumerWidget {
                             context,
                             'View All Dams',
                             () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProvinceDamsScreen(
-                                    provinceName: provinceName,
-                                    provinceCode: provinceCode,
+                              if (provinceCode == 'WC') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const WCDamsScreen(),
                                   ),
-                                ),
-                              );
+                                );
+                              } else if (provinceCode == 'EC') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ECDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'FS') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const FSDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'NC') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const NCDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'KZN') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const KZNDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'GP') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const GPDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'MP') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const MPDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'LP') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LPDamsScreen(),
+                                  ),
+                                );
+                              } else if (provinceCode == 'NW') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const NWDamsScreen(),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProvinceDamsScreen(
+                                      provinceName: provinceName,
+                                      provinceCode: provinceCode,
+                                    ),
+                                  ),
+                                );
+                              }
                             },
                             isSecondary: true,
                           ),
@@ -163,7 +237,12 @@ class ProvinceDetailsScreen extends ConsumerWidget {
                               context,
                               'City of Cape Town',
                               () {
-                                // TODO: Navigate to City of Cape Town screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => WCDamsScreen(),
+                                  ),
+                                );
                               },
                               isSecondary: false,
                             ),

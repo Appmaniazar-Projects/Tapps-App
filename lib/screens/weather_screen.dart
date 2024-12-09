@@ -5,141 +5,164 @@ import 'package:geocoding/geocoding.dart';
 import 'package:logger/logger.dart';
 import 'package:tapps/constants/text_styles.dart';
 import 'package:tapps/extensions/datetime.dart';
-import 'package:tapps/providers/current_weather_provider.dart';
-import 'package:tapps/services/places_service.dart';
+import 'package:tapps/services/weather_service.dart';
 import 'package:tapps/views/gradient_container.dart';
-import 'package:tapps/views/hourly_forecast.dart';
-import 'package:tapps/views/location_search.dart';
+import 'package:tapps/views/hourly_forecast_view.dart';
 import 'package:tapps/views/weather_info.dart';
 import 'package:tapps/views/weather_skeleton.dart';
 
-final selectedLocationProvider = StateProvider<String?>((ref) => null);
-final selectedCoordinatesProvider = StateProvider<Location?>((ref) => null);
+final selectedLocationProvider = StateProvider<Map<String, dynamic>?>((ref) => null);
 
-class WeatherScreen extends ConsumerWidget {
+class WeatherScreen extends ConsumerStatefulWidget {
   const WeatherScreen({super.key});
+
+  @override
+  _WeatherScreenState createState() => _WeatherScreenState();
+}
+
+class _WeatherScreenState extends ConsumerState<WeatherScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+  List<dynamic> _searchResults = [];
+
+  void _searchLocations(String query) async {
+    if (query.isEmpty) return;
+
+    try {
+      final results = await ref.read(locationSearchProvider(query).future);
+      setState(() {
+        _searchResults = results;
+      });
+    } catch (e) {
+      Logger().e('Search error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error searching locations: $e')),
+      );
+    }
+  }
+
+  void _selectLocation(Map<String, dynamic> location) {
+    ref.read(selectedLocationProvider.notifier).state = location;
+    _searchController.clear();
+    _searchResults.clear();
+    _searchFocusNode.unfocus();
+  }
 
   String _getWeatherIcon(String code) {
     final baseCode = code.replaceAll('n', 'd');
     return 'assets/icons/$baseCode.png';
   }
 
-  void _onLocationSelected(WidgetRef ref, String location) async {
-    try {
-      final placesService = ref.read(placesServiceProvider);
-      final coordinates = await placesService.getLocationFromAddress(location);
-      ref.read(selectedLocationProvider.notifier).state = location;
-      ref.read(selectedCoordinatesProvider.notifier).state = coordinates;
-    } catch (e) {
-      Logger().e('Error getting location coordinates: $e');
-      // Show error to user
-    }
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final logger = Logger();
+  Widget build(BuildContext context) {
     final selectedLocation = ref.watch(selectedLocationProvider);
-    final selectedCoordinates = ref.watch(selectedCoordinatesProvider);
     
-    final weatherData = selectedCoordinates != null
-        ? ref.watch(weatherByCoordinatesProvider(selectedCoordinates))
-        : ref.watch(currentWeatherProvider);
+    final weatherData = selectedLocation != null
+        ? ref.watch(currentWeatherProvider(
+            lat: selectedLocation['lat'], 
+            lon: selectedLocation['lon']
+          ))
+        : null;
 
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-    ));
+    final forecastData = selectedLocation != null
+        ? ref.watch(weatherForecastProvider(
+            lat: selectedLocation['lat'], 
+            lon: selectedLocation['lon']
+          ))
+        : null;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: weatherData.when(
-        data: (weather) {
-          try {
-            return GradientContainer(
-              children: [
-                SafeArea(
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      LocationSearch(
-                        onLocationSelected: (location) =>
-                            _onLocationSelected(ref, location),
+      body: SafeArea(
+        child: GradientContainer(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      hintText: 'Search for a location',
+                      prefixIcon: const Icon(Icons.search, color: Colors.white),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.2),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
                       ),
-                      const SizedBox(height: 20),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: double.infinity),
-                          Text(
-                            selectedLocation ?? weather.name,
-                            style: TextStyles.h1,
-                          ),
-                          const SizedBox(height: 15),
-                          Text(
-                            DateTime.now().dateTime,
-                            style: TextStyles.subtitleText,
-                          ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            height: 200,
-                            child: Image.asset(
-                              _getWeatherIcon(weather.weather[0].icon),
-                              width: 160,
-                              height: 160,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
-                                Icons.cloud,
-                                size: 100,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            weather.weather[0].description,
-                            style: TextStyles.h3,
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                      WeatherInfo(weather: weather),
-                      const SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Today', style: TextStyles.h2),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                'Next 7 Days >',
-                                style: TextStyles.buttonText,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const HourlyForecast(),
-                    ],
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                    onChanged: _searchLocations,
                   ),
-                ),
-              ],
-            );
-          } catch (e) {
-            logger.e('Error building weather UI: $e');
-            return const WeatherSkeleton();
-          }
-        },
-        loading: () => const WeatherSkeleton(),
-        error: (error, stackTrace) {
-          logger.e('Error loading weather data: $error');
-          return const WeatherSkeleton();
-        },
+                  if (_searchResults.isNotEmpty)
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) {
+                          final location = _searchResults[index];
+                          return ListTile(
+                            title: Text(
+                              '${location['name']}, ${location['country']}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            onTap: () => _selectLocation(location),
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  
+                  // Current Weather Display
+                  weatherData != null
+                    ? weatherData.when(
+                        loading: () => const WeatherSkeleton(),
+                        error: (error, stack) => Center(
+                          child: Text(
+                            'Error loading weather: $error',
+                            style: TextStyles.subtitleText.copyWith(color: Colors.white),
+                          ),
+                        ),
+                        data: (weather) => WeatherInfo(
+                          cityName: weather['name'],
+                          temperature: weather['main']['temp'].toStringAsFixed(1),
+                          description: weather['weather'][0]['description'],
+                          icon: _getWeatherIcon(weather['weather'][0]['icon']),
+                        ),
+                      )
+                    : const WeatherSkeleton(),
+                  
+                  // Hourly Forecast
+                  const SizedBox(height: 16),
+                  forecastData != null
+                    ? forecastData.when(
+                        loading: () => const CircularProgressIndicator(),
+                        error: (error, stack) => Center(
+                          child: Text(
+                            'Error loading forecast: $error',
+                            style: TextStyles.subtitleText.copyWith(color: Colors.white),
+                          ),
+                        ),
+                        data: (forecast) => HourlyForecastView(forecastData: forecast),
+                      )
+                    : const SizedBox.shrink(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 }

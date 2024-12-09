@@ -194,6 +194,7 @@ class FirebaseService {
         throw FirebaseException('Invalid province code for dams: $provinceCode');
       }
 
+      // Use standard naming pattern for all provinces
       final collectionName = '${provinceCode}Dams';
       debugPrint('🌊 Fetching dams for province: $provinceCode');
       debugPrint('📁 Collection: $collectionName');
@@ -204,6 +205,13 @@ class FirebaseService {
             .snapshots()
             .handleError((error) {
               debugPrint('❌ Error fetching province dams for $provinceCode: $error');
+              
+              // If it's a permission error, return an empty list instead of throwing an exception
+              if (error.code == 'permission-denied') {
+                debugPrint('🔒 Permission denied for $provinceCode dams collection');
+                return Stream.value([]);
+              }
+              
               throw FirebaseException('Failed to fetch province dams for $provinceCode', error);
             })
             .map((snapshot) {
@@ -213,7 +221,15 @@ class FirebaseService {
                 debugPrint('✅ Successfully fetched ${snapshot.docs.length} dams for province: $provinceCode');
               }
               return snapshot.docs
-                  .map((doc) => {'id': doc.id, ...doc.data()})
+                  .map((doc) => {
+                        'id': doc.id,
+                        'name': doc.data()['name'] ?? 'Unknown Dam',
+                        'this_week_level': (doc.data()['total'] ?? 0).toDouble(),
+                        // Add location if available
+                        'location': _getDefaultLocation(doc.data()['name'] ?? ''),
+                        // Add capacity if available
+                        'capacity': _getDefaultCapacity(doc.data()['name'] ?? ''),
+                      })
                   .toList();
             });
       }, 'getProvinceDams');
@@ -221,6 +237,24 @@ class FirebaseService {
       debugPrint('❌ Error in getProvinceDams for $provinceCode: $e');
       throw FirebaseException('Failed to create province dams stream for $provinceCode', e);
     }
+  }
+
+  // Helper method to provide default location based on dam name
+  String _getDefaultLocation(String damName) {
+    final locationMap = {
+      'Leeugamka Dam': 'Western Cape',
+      // Add more dams and their locations as you discover them
+    };
+    return locationMap[damName] ?? 'Location Not Available';
+  }
+
+  // Helper method to provide default capacity based on dam name
+  String _getDefaultCapacity(String damName) {
+    final capacityMap = {
+      'Leeugamka Dam': 'Capacity Not Available',
+      // Add more dams and their capacities as you discover them
+    };
+    return capacityMap[damName] ?? 'Capacity Not Available';
   }
 
   Stream<List<Province>> getProvinces() {
@@ -234,6 +268,42 @@ class FirebaseService {
     } catch (e) {
       debugPrint('🔴 Error getting provinces: $e');
       rethrow;
+    }
+  }
+
+  // Fetch a specific dam by its ID
+  Future<Map<String, dynamic>?> getSpecificDam(String damId) async {
+    try {
+      debugPrint('🔍 Fetching specific dam with ID: $damId');
+      
+      final damDoc = await _firestore
+          .collection('WCDams')
+          .doc(damId)
+          .get();
+
+      if (!damDoc.exists) {
+        debugPrint('❌ No dam found with ID: $damId');
+        return null;
+      }
+
+      final damData = damDoc.data();
+      if (damData == null) {
+        debugPrint('❌ Dam document is empty for ID: $damId');
+        return null;
+      }
+
+      final damDetails = {
+        'id': damDoc.id,
+        'name': damData['name'] ?? 'Unknown Dam',
+        'total_level': damData['total_level'] ?? 0.0,
+        // Add more fields as needed
+      };
+
+      debugPrint('✅ Successfully fetched dam details: ${damDetails['name']}');
+      return damDetails;
+    } catch (e) {
+      debugPrint('❌ Error fetching specific dam: $e');
+      return null;
     }
   }
 }
