@@ -98,7 +98,8 @@ class _PickLocationScreenState extends ConsumerState<PickLocationScreen> {
     });
 
     try {
-      final details = await ref.read(placesServiceProvider).getPlaceDetails(placeId);
+      final details =
+          await ref.read(placesServiceProvider).getPlaceDetails(placeId);
       await _addToHistory(details.name);
       if (mounted) {
         Navigator.pop(context, details.name);
@@ -122,7 +123,7 @@ class _PickLocationScreenState extends ConsumerState<PickLocationScreen> {
       children: [
         AppBar(
           backgroundColor: Colors.transparent,
-          title: Text('Pick Location', style: TextStyles.h2),
+          title: const Text('Pick Location', style: TextStyles.h2),
           actions: [
             IconButton(
               icon: const Icon(Icons.clear_all),
@@ -171,7 +172,7 @@ class _PickLocationScreenState extends ConsumerState<PickLocationScreen> {
                     if (_searchQuery.isEmpty) {
                       return _buildSearchHistory();
                     }
-                    
+
                     return ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: places.length,
@@ -191,7 +192,8 @@ class _PickLocationScreenState extends ConsumerState<PickLocationScreen> {
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, _) => Center(
                     child: Text(
                       'Failed to search locations',

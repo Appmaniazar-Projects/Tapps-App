@@ -86,16 +86,12 @@ class FSDamsScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Error Loading Dams',
+                      'Error Loading Dams: ${error.toString()}',
                       style: TextStyles.subtitleText.copyWith(color: Colors.white),
                     ),
-                    Text(
-                      error.toString(),
-                      style: TextStyles.subtitleText.copyWith(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
+                    TextButton(
+                      onPressed: () => ref.refresh(provinceDamsProvider('FS')),
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),

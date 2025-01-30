@@ -38,27 +38,34 @@ class Weather {
   double get temperature => main.temp;
   int get humidity => main.humidity ?? 0;
   double get windSpeed => wind.speed;
+  double get visibilityInKm => (visibility ?? 0) / 1000.0;
 
-  factory Weather.fromJson(Map<String, dynamic> json) => Weather(
+  factory Weather.fromJson(Map<String, dynamic> json) {
+    try {
+      return Weather(
         coord: Coord.fromJson(json['coord'] as Map<String, dynamic>),
         weather: (json['weather'] as List<dynamic>)
             .map((e) => WeatherData.fromJson(e as Map<String, dynamic>))
             .toList(),
         base: json['base'] as String,
         main: Main.fromJson(json['main'] as Map<String, dynamic>),
-        visibility: json['visibility'] ?? 0,
+        visibility: json['visibility'] as int?,
         wind: Wind.fromJson(json['wind'] as Map<String, dynamic>),
         rain: json['rain'] != null
             ? Rain.fromJson(json['rain'] as Map<String, dynamic>)
             : null,
         clouds: Clouds.fromJson(json['clouds'] as Map<String, dynamic>),
-        dt: json['dt'] as int,
+        dt: (json['dt'] as num).toInt(),
         sys: Sys.fromJson(json['sys'] as Map<String, dynamic>),
-        timezone: json['timezone'] as int,
-        id: json['id'] as int,
+        timezone: (json['timezone'] as num).toInt(),
+        id: (json['id'] as num).toInt(),
         name: json['name'] as String,
-        cod: json['cod'] as int,
+        cod: (json['cod'] as num).toInt(),
       );
+    } catch (e) {
+      throw FormatException('Failed to parse weather data: $e');
+    }
+  }
 }
 
 @immutable
@@ -109,7 +116,6 @@ class Main {
   final int? humidity;
   final int? seaLevel;
   final int? grndLevel;
-  final int? visibility;
 
   const Main({
     required this.temp,
@@ -120,20 +126,24 @@ class Main {
     this.humidity,
     this.seaLevel,
     this.grndLevel,
-    this.visibility,
   });
 
-  factory Main.fromJson(Map<String, dynamic> json) => Main(
-        temp: json['temp'] as double,
-        feelsLike: json['feels_like'] as double,
-        tempMin: json['temp_min'] as double,
-        tempMax: json['temp_max'] as double,
-        pressure: json['pressure'],
-        humidity: json['humidity'],
-        seaLevel: json['sea_level'],
-        grndLevel: json['grnd_level'],
-        visibility: json['visibility'],
+  factory Main.fromJson(Map<String, dynamic> json) {
+    try {
+      return Main(
+        temp: (json['temp'] as num).toDouble(),
+        feelsLike: (json['feels_like'] as num).toDouble(),
+        tempMin: (json['temp_min'] as num).toDouble(),
+        tempMax: (json['temp_max'] as num).toDouble(),
+        pressure: json['pressure'] != null ? (json['pressure'] as num).toInt() : null,
+        humidity: json['humidity'] != null ? (json['humidity'] as num).toInt() : null,
+        seaLevel: json['sea_level'] != null ? (json['sea_level'] as num).toInt() : null,
+        grndLevel: json['grnd_level'] != null ? (json['grnd_level'] as num).toInt() : null,
       );
+    } catch (e) {
+      throw FormatException('Failed to parse main weather data: $e');
+    }
+  }
 }
 
 @immutable
@@ -162,7 +172,7 @@ class Rain {
   const Rain({this.oneHour});
 
   factory Rain.fromJson(Map<String, dynamic> json) {
-    return Rain(oneHour: json['oneHour'] ?? 0.0);
+    return Rain(oneHour: json['1h'] ?? 0.0);
   }
 }
 

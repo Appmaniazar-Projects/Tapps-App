@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show immutable;
+import 'package:geolocator/geolocator.dart';
+import 'package:logger/logger.dart';
 import 'package:tapps/constants/constants.dart';
 import 'package:tapps/models/hourly_weather.dart';
 import 'package:tapps/models/weather.dart';
 import 'package:tapps/models/weekly_weather.dart';
 import 'package:tapps/services/geolocator.dart';
 import 'package:tapps/utils/logging.dart';
-import 'package:geolocator/geolocator.dart';
 
 @immutable
 class ApiHelper {
@@ -17,6 +18,7 @@ class ApiHelper {
   static bool _locationFetched = false;
 
   static final dio = Dio();
+  static final logger = Logger();
   static Weather? _cachedWeather;
   static DateTime? _lastWeatherFetch;
   static const _cacheValidityDuration = Duration(minutes: 5); // Reduced cache time
@@ -56,9 +58,56 @@ class ApiHelper {
   //Hourly Weather
   static Future<HourlyWeather> getHourlyForecast() async {
     await fetchLocation();
-    final url = _construcForecastUrl();
-    final response = await _fetchData(url);
-    return HourlyWeather.fromJson(response);
+    if (_currentPosition == null) {
+      throw Exception('Location not available');
+    }
+    
+    final url = '$baseUrl/forecast?lat=${_currentPosition!.latitude}&lon=${_currentPosition!.longitude}&appid=${Constants.apiKey}&units=metric';
+    
+    try {
+      final response = await _fetchData(url);
+      
+      // Add debug logging
+      print('Hourly Forecast Raw Response: $response');
+      
+      if (response == null) {
+        throw Exception('API returned null response');
+      }
+      
+      // Validate the response structure
+      if (!response.containsKey('list')) {
+        print('Response keys available: ${response.keys.toList()}');
+        throw FormatException('Missing list key in response');
+      }
+      
+      // Create HourlyWeather object
+      final hourlyWeather = HourlyWeather.fromJson(response);
+      print('Successfully parsed HourlyWeather with ${hourlyWeather.list.length} entries');
+      return hourlyWeather;
+      
+    } catch (e, stackTrace) {
+      print('Error in getHourlyForecast: $e');
+      print('Stack trace: $stackTrace');
+      rethrow;
+    }
+  }
+
+  static Future<Map<String, dynamic>> _fetchData(String url) async {
+    try {
+      final response = await dio.get(url);
+      if (response.statusCode == 200 && response.data != null) {
+        if (response.data is! Map<String, dynamic>) {
+          throw FormatException('Invalid response format');
+        }
+        return response.data;
+      } else {
+        printWarning('Failed to load data: ${response.statusCode}');
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      printWarning('Error fetching data from $url: $e');
+      throw Exception('Error fetching data: $e');
+    }
   }
 
   //Weekly Forecast
@@ -101,18 +150,23 @@ class ApiHelper {
     return '$weeklyWeatherUrl&latitude=${_currentPosition!.latitude}&longitude=${_currentPosition!.longitude}';
   }
 
-  static Future<Map<String, dynamic>> _fetchData(String url) async {
-    try {
-      final response = await dio.get(url);
-      if (response.statusCode == 200) {
-        return response.data;
-      } else {
-        printWarning('Failed to load data: ${response.statusCode}');
-        throw Exception('Failed to load data');
-      }
-    } catch (e) {
-      printWarning('Error fetching data from $url: $e');
-      throw Exception('Error fetching data');
-    }
-  }
+  // static Future<Map<String, dynamic>> _fetchData(String url) async {
+  //   try {
+  //     final response = await dio.get(url);
+  //     if (response.statusCode == 200 && response.data != null) {
+  //       if (response.data is! Map<String, dynamic>) {
+  //         throw FormatException('Invalid response format');
+  //       }
+  //       return response.data;
+  //     } else {
+  //       printWarning('Failed to load data: ${response.statusCode}');
+  //       throw Exception('Failed to load data');
+  //     }
+  //   } catch (e) {
+  //     printWarning('Error fetching data from $url: $e');
+  //     throw Exception('Error fetching data: $e');
+  //   }
+  // }
+  
+  // Remove the duplicate _fetchData method at the bottom
 }

@@ -30,33 +30,35 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_riverpod: ^2.6.1
+  http: ^0.13.6
+  logger: ^2.1.0
   cupertino_icons: ^1.0.2
-  flutter_riverpod: ^2.3.6
-  dio: ^5.3.2
-  shared_preferences: ^2.2.0
-  jiffy: ^6.2.1
+  dio: ^5.8.0
+  dio_web_adapter: ^2.1.0
+  shared_preferences: ^2.4.0
+  jiffy: ^6.3.2
   google_places_flutter: ^2.0.6
   google_maps_flutter: ^2.4.0
-  google_maps_webservice: ^0.0.19
-  geolocator: ^10.0.0
-  geocoding: ^2.1.0
-  logger: ^2.4.0
+  google_maps_webservice: ^0.0.20-nullsafety.5
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
   location: ^7.0.1
   google_fonts: ^4.0.4
   url_launcher: ^6.2.5
   lottie: ^2.7.0
   shimmer: ^3.0.0
   
-  # Firebase
-  firebase_core: ^2.24.2
-  firebase_database: ^10.3.8
-  cloud_firestore: ^4.13.6
+  # Firebase packages
+  firebase_core: ^3.10.1
+  firebase_database: ^11.3.1
+  cloud_firestore: ^5.6.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.3
 
 flutter:
 

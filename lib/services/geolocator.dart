@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
+import 'package:logger/logger.dart';
 
 Future<Position> getLocation() async {
   bool serviceEnabled;
@@ -34,7 +35,7 @@ Future<Position> getLocation() async {
         desiredAccuracy: LocationAccuracy.best,
       );
     }
-    
+
     // For mobile platforms, try to get last known position first
     try {
       Position? lastKnownPosition = await Geolocator.getLastKnownPosition();
@@ -46,13 +47,15 @@ Future<Position> getLocation() async {
       }
     } catch (e) {
       // Ignore errors from getLastKnownPosition
+      Logger().e('Error getting last known position: $e');
     }
-    
+
     // Get fresh position
     return await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.best,
     );
   } catch (e) {
+    Logger().e('Failed to get location: $e');
     return Future.error(
       'Failed to get location. Please check your internet connection and try again.');
   }

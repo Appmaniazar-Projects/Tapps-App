@@ -240,7 +240,7 @@ class ProvinceDetailsScreen extends ConsumerWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => WCDamsScreen(),
+                                    builder: (context) => const WCDamsScreen(),
                                   ),
                                 );
                               },

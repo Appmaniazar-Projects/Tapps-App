@@ -186,6 +186,37 @@ class FirebaseService {
     }
   }
 
+  Stream<ProvinceRecord> getCapeTownMetroTotals() {
+    try {
+      const collectionName = 'CTMetroTotals';
+      const docId = 'capeTownMetroTotal';  // You'll need to replace this with the actual document ID
+      
+      debugPrint('📊 Fetching data for Cape Town Metro');
+      
+      return _withStreamRetry(() {
+        return _firestore
+            .collection(collectionName)
+            .doc(docId)
+            .snapshots()
+            .handleError((error) {
+              debugPrint('❌ Error fetching Cape Town Metro totals: $error');
+              throw FirebaseException('Failed to fetch Cape Town Metro totals', error);
+            })
+            .map((snapshot) {
+              if (!snapshot.exists) {
+                debugPrint('⚠️ No data found for Cape Town Metro');
+                throw FirebaseException('No data found for Cape Town Metro');
+              }
+              debugPrint('✅ Successfully fetched data for Cape Town Metro');
+              return ProvinceRecord.fromFirestore(snapshot);
+            });
+      }, 'getCapeTownMetroTotals');
+    } catch (e) {
+      debugPrint('❌ Error in getCapeTownMetroTotals: $e');
+      throw FirebaseException('Failed to create Cape Town Metro totals stream', e);
+    }
+  }
+
   Stream<List<Map<String, dynamic>>> getProvinceDams(String provinceCode) {
     try {
       // Validate province code first

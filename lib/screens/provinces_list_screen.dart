@@ -39,10 +39,25 @@ class ProvincesListScreen extends ConsumerWidget {
                 child: CircularProgressIndicator(color: Colors.white),
               ),
               error: (error, stack) => Center(
-                child: Text(
-                  'Error loading provinces: ${error.toString()}',
-                  style: GoogleFonts.outfit(color: Colors.white),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.white,
+                      size: 60,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading provinces: ${error.toString()}',
+                      style: GoogleFonts.outfit(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                    TextButton(
+                      onPressed: () => ref.refresh(provincesProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
               data: (provinces) => ListView.builder(
@@ -101,6 +116,7 @@ class ProvincesListScreen extends ConsumerWidget {
                             const Icon(
                               Icons.arrow_forward_ios,
                               color: Colors.white70,
+                              size: 24,
                             ),
                           ],
                         ),

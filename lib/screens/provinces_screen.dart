@@ -132,7 +132,8 @@ class ProvincesScreen extends ConsumerWidget {
                       final province = provinces[index];
                       final damsAsyncValue =
                           ref.watch(provinceDamsProvider(province.code));
-                      return _buildProvinceCard(context, province, damsAsyncValue);
+                      return _buildProvinceCard(
+                          context, province, damsAsyncValue);
                     },
                   ),
                 ),
@@ -211,7 +212,7 @@ class ProvincesScreen extends ConsumerWidget {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.green,
                                 shape: BoxShape.circle,
                               ),
@@ -255,7 +256,7 @@ class ProvincesScreen extends ConsumerWidget {
                             Container(
                               width: 8,
                               height: 8,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.red,
                                 shape: BoxShape.circle,
                               ),

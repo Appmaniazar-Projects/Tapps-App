@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show immutable;
 
-import '/models/weather.dart';
+import '/models/weather.dart' show WeatherData;
 
 @immutable
 class HourlyWeather {
@@ -58,20 +58,30 @@ class WeatherEntry {
   });
 
   factory WeatherEntry.fromJson(Map<String, dynamic> json) {
-    return WeatherEntry(
-      dt: json['dt'] ?? 0,
-      main: Main.fromJson(json['main']),
-      weather: (json['weather'] as List<dynamic>)
-          .map((weatherData) => WeatherData.fromJson(weatherData))
-          .toList(),
-      clouds: Clouds.fromJson(json['clouds']),
-      wind: Wind.fromJson(json['wind']),
-      visibility: json['visibility'] ?? 0,
-      pop: json['pop'] ?? 0.0,
-      sys: json['sys'] != null ? Sys.fromJson(json['sys']) : null,
-      rain: json['rain'] != null ? Rain.fromJson(json['rain']) : null,
-      dtTxt: json['dt_txt'],
-    );
+    try {
+      return WeatherEntry(
+        dt: json['dt'] ?? 0,
+        main: Main.fromJson(json['main'] as Map<String, dynamic>),
+        weather: (json['weather'] as List<dynamic>)
+            .map((w) => WeatherData.fromJson(w as Map<String, dynamic>))
+            .toList(),
+        clouds: Clouds.fromJson(json['clouds'] as Map<String, dynamic>),
+        wind: Wind.fromJson(json['wind'] as Map<String, dynamic>),
+        visibility: json['visibility'] ?? 0,
+        pop: json['pop'] ?? 0.0,
+        sys: json['sys'] != null 
+            ? Sys.fromJson(json['sys'] as Map<String, dynamic>)
+            : null,
+        rain: json['rain'] != null 
+            ? Rain.fromJson(json['rain'] as Map<String, dynamic>)
+            : null,
+        dtTxt: json['dt_txt'] ?? '',
+      );
+    } catch (e) {
+      print('Error parsing WeatherEntry: $json');
+      print('Error details: $e');
+      rethrow;
+    }
   }
 }
 
@@ -101,15 +111,15 @@ class Main {
 
   factory Main.fromJson(Map<String, dynamic> json) {
     return Main(
-      temp: json['temp'].toDouble(),
-      feelsLike: json['feels_like'].toDouble(),
-      tempMin: json['temp_min'].toDouble(),
-      tempMax: json['temp_max'].toDouble(),
-      pressure: json['pressure'],
-      seaLevel: json['sea_level'],
-      grndLevel: json['grnd_level'],
-      humidity: json['humidity'],
-      tempKf: json['temp_kf'].toDouble(),
+      temp: (json['temp'] ?? 0).toDouble(),
+      feelsLike: (json['feels_like'] ?? 0).toDouble(),
+      tempMin: (json['temp_min'] ?? 0).toDouble(),
+      tempMax: (json['temp_max'] ?? 0).toDouble(),
+      pressure: json['pressure'] ?? 0,
+      seaLevel: json['sea_level'] ?? 0,
+      grndLevel: json['grnd_level'] ?? 0,
+      humidity: json['humidity'] ?? 0,
+      tempKf: (json['temp_kf'] ?? 0).toDouble(),
     );
   }
 }

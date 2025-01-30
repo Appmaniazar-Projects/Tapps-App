@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tapps/config/firebase_config.dart';
 import 'package:tapps/constants/app_colors.dart';
 import 'package:tapps/screens/home_screen.dart';
+import 'package:tapps/screens/pick_location_screen.dart';
 import 'package:tapps/screens/provinces_screen.dart';
 import 'package:tapps/screens/report_screen.dart';
-import 'package:tapps/screens/weather_screen.dart';
 import 'package:tapps/screens/search_screen.dart';
-import 'package:tapps/screens/pick_location_screen.dart';
+import 'package:tapps/screens/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,9 +39,11 @@ void main() async {
       );
 
       // Enable Firestore offline persistence with size limit
-      await FirebaseFirestore.instance.enablePersistence(
+      await FirebaseFirestore.instance
+          .enablePersistence(
         const PersistenceSettings(synchronizeTabs: true),
-      ).catchError((e) {
+      )
+          .catchError((e) {
         debugPrint('⚠️ Persistence initialization warning: $e');
       });
 
@@ -88,9 +90,50 @@ void main() async {
       return;
     }
   } else {
-    await Firebase.initializeApp(
-      options: FirebaseConfig.webOptions,
-    );
+    try {
+      await Firebase.initializeApp();  // Use default options for mobile
+      debugPrint('✅ Firebase initialized successfully');
+    } catch (e) {
+      debugPrint('❌ Failed to initialize Firebase: $e');
+      runApp(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Failed to initialize app',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Please check your internet connection and try again.\nError: ${e.toString()}',
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Reload the app
+                      main();
+                    },
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      return;
+    }
   }
 
   runApp(const ProviderScope(child: MainApp()));
@@ -132,7 +175,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static final List<Widget> _screens = [
     const HomeScreen(),
-    const WeatherScreen(),
+    WeatherScreen(),
     const ProvincesScreen(),
     const ReportScreen(),
   ];

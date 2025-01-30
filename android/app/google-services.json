@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "792179995434",
+    "project_id": "tapps-4b1cb",
+    "storage_bucket": "tapps-4b1cb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:792179995434:android:a78411a9729bb4d8c0e453",
+        "android_client_info": {
+          "package_name": "com.appmaniazar.tapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "792179995434-tejv2su2qtrhpg0s5spbg160e74i4agn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6C71svyRFlVLWZAm53VuG2J35G3PNY0Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "792179995434-9jeeacuakdaaqea2cdllnq9g68rhcnlc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "792179995434-00gb18ba50r8ob5tjriamobhgv1shr90.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tapps.appmaniazar"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

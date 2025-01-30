@@ -158,7 +158,7 @@ class SearchHistoryCard extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Weather data unavailable',
+            'Weather data unavailable: ${error.toString()}',
             style: TextStyles.smallText.copyWith(color: Colors.white70),
           ),
         ],

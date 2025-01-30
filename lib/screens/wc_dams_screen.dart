@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tapps/constants/app_colors.dart';
 import 'package:tapps/constants/text_styles.dart';
+import 'package:tapps/screens/cape_town_screen.dart';
 import 'package:tapps/services/firebase_service.dart';
 import 'package:tapps/views/gradient_container.dart';
 
@@ -86,6 +87,41 @@ class WCDamsScreen extends ConsumerWidget {
       body: SafeArea(
         child: GradientContainer(
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CapeTownScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white.withOpacity(0.2),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.location_city, color: Colors.white),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Explore Cape Town',
+                      style: GoogleFonts.outfit(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             wcDamsAsync.when(
               loading: () => const Center(
                 child: CircularProgressIndicator(color: Colors.white),
